@@ -1,0 +1,39 @@
+{
+  "name": "example-app",
+  "main": "./src/main.ts",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "~14.2.0",
+    "@angular/common": "~14.2.0",
+    "@angular/compiler": "~14.2.0",
+    "@angular/core": "~14.2.0",
+    "@angular/forms": "~14.2.0",
+    "@angular/platform-browser": "~14.2.0",
+    "@angular/platform-browser-dynamic": "~14.2.0",
+    "@angular/router": "~14.2.0",
+    "@awarns/core": "^1.1.0",
+    "@awarns/geofencing": "^1.1.0",
+    "@awarns/geolocation": "^1.0.0",
+    "@awarns/human-activity": "^1.0.0",
+    "@awarns/notifications": "^1.0.0",
+    "@awarns/persistence": "^1.1.0",
+    "@awarns/phone-sensors": "^1.2.2",
+    "@nativescript/angular": "~14.2.0",
+    "@nativescript/core": "~8.3.0",
+    "@nativescript/theme": "~3.0.2",
+    "nativescript-android-sensors": "^2.1.0",
+    "nativescript-barcodescanner": "^4.1.2",
+    "rxjs": "~7.5.0",
+    "zone.js": "~0.11.5"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "~14.2.0",
+    "@angular/compiler-cli": "~14.2.0",
+    "@nativescript/android": "8.3.1",
+    "@nativescript/types": "~8.3.0",
+    "@nativescript/webpack": "~5.0.9",
+    "@ngtools/webpack": "~14.2.0",
+    "typescript": "~4.7.0"
+  }
+}

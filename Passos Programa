@@ -1,0 +1,12 @@
+
+---- BOTÃO DE LER QR ----
+
+ LEITURA QR -> TASK DE SENSOR INICIADA (ACELEROMETO, MAGNETOMETRO, ETC...) -> Recolha continua de dados enquanto não se ler denovo um qr -> Processamento de dados em uma rota -> Finalização do processamento da rota aquando da leitura de outro qr (Confirmar se é o mesmo ou não? Confirmar se é um qr code associado à uminho) -> Demonstração da rota e storage da mesma
+ 
+- # - # - # - # - #
+
+---- BOTÃO DE NAVEGAR NO MAPA ----
+
+ LEITURA QR -> Escolha de sala destino -> Verificação da existência de rota -> ...
+ 
+- # - # - # - # - #
