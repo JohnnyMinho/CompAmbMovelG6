@@ -1,0 +1,34 @@
+
+              <ScrollView>
+                <StackLayout class="tab-content">
+    
+                  <Label class="h3" text="Permissões para a Câmara Manuais" horizontalAlignment ="center"></Label>
+                  <Button class="-primary" text="Verificar Permissões" (tap)="doCheckHasCameraPermission()"></Button>
+                  <Button class="-primary" text="Pedir Permissão" (tap)=" doRequestCameraPermission() "></Button>
+    
+                  <iOS>
+                    <GridLayout>
+                      <Barcode:BarcodeScannerView
+                          class="scanner-round"
+                          formats="QR_CODE, EAN_13, CODE_128"
+                          beepOnScan="true"
+                          reportDuplicates="true"
+                          preferFrontCamera="false"
+                          scanResult=" onScanResult " />
+                      <Image src="../../assets/crosshair.png" width="140" height="140" style="margin-top: 14; opacity: 0.3" horizontalAlignment="center" verticalAlignment="center"></Image>
+                      <!--<Label text="......................................." style="margin-top: 8; color: #FFF; opacity: 0.5" horizontalAlignment="center" verticalAlignment="center"/>-->
+                    </GridLayout>
+                  </iOS>
+    
+                  <Button class="-primary" text="Ler QR" (tap)=" doScanWithBackCamera() "></Button>
+                  <Label [text]="degreeDirection"> </Label>
+                  <Label > Dados accelerometer(x,y,z)</Label>
+                  <Label class="accelerometerx" [text]="[(accelerometer.x)]"> </Label>
+                  <Label class="accelerometery" [text]="[(accelerometer.y)]"> </Label>
+                  <Label class="accelerometerz" [text]="[(accelerometer.z)]"> </Label>
+                  <Label > Dados giroscopio(x,y,z)</Label>
+                  <Label class="gyroscopex" [text]="[(gyroscope.x)]"></Label>
+                  <Label class="gyroscopey" [text]="[(gyroscope.y)]"></Label>
+                  <Label class="gyroscopez" [text]="[(gyroscope.z)]"></Label>
+                </StackLayout>
+              </ScrollView>
