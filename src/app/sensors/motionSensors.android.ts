@@ -35,12 +35,12 @@ export class MotionSensor extends MotionSensorBase {
     }
     return deviceSensors;
   }
-/** 
+
   onStep(callback: CallbackMotion, callbackStepStatus: CallbackMotion) {
     const stepCounterSensor = this.sensorManager.getDefaultSensor(
-      android.hardware.Sensor.TYPE_STEP_COUNTER
+      19
     );
-
+0
     if (stepCounterSensor) {
       this.hasSensorStepCounter = true;
       let initSteps = -1;
@@ -58,7 +58,7 @@ export class MotionSensor extends MotionSensorBase {
     }
 
     const stepStatusSensor = this.sensorManager.getDefaultSensor(
-      android.hardware.Sensor.TYPE_STEP_DETECTOR
+      18
     );
 
     if (stepStatusSensor) {
@@ -70,7 +70,7 @@ export class MotionSensor extends MotionSensorBase {
         android.hardware.SensorManager.SENSOR_DELAY_FASTEST
       );
     }
-  }*/
+  }
 
   onOrientation(callback: CallbackMotion) {
     const orientationSensor = this.sensorManager.getDefaultSensor(

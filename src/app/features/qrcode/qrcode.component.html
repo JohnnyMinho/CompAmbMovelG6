@@ -14,21 +14,24 @@
                           beepOnScan="true"
                           reportDuplicates="true"
                           preferFrontCamera="false"
-                          scanResult=" onScanResult " />
+                          (scanResult)=" onScanResult($event) " />
                       <Image src="../../assets/crosshair.png" width="140" height="140" style="margin-top: 14; opacity: 0.3" horizontalAlignment="center" verticalAlignment="center"></Image>
                       <!--<Label text="......................................." style="margin-top: 8; color: #FFF; opacity: 0.5" horizontalAlignment="center" verticalAlignment="center"/>-->
                     </GridLayout>
                   </iOS>
-    
+                  <Button class="-primary" text = "Parar recolha de dados" (tap)="stopButton"></Button>
+                  <Button class="-primary" text = "Iniciar recolha de dados" (tap)="startButton"></Button>
+                  <Label> Recolha de dados ativa -> {{door_scanned}}</Label>
                   <Button class="-primary" text="Ler QR" (tap)=" doScanWithBackCamera() "></Button>
                   <Label [text]="degreeDirection"> </Label>
                   <Label > Dados accelerometer(x,y,z)</Label>
-                  <Label class="accelerometerx" [text]="[(accelerometer.x)]"> </Label>
-                  <Label class="accelerometery" [text]="[(accelerometer.y)]"> </Label>
-                  <Label class="accelerometerz" [text]="[(accelerometer.z)]"> </Label>
+                  <Label class="accelerometerx" on="this.motionSensor.onAccelerometer" >{{accelerometer.x}} </Label>
+                  <Label class="accelerometery">{{accelerometer.y}} </Label>
+                  <Label class="accelerometerz">{{accelerometer.z}} </Label>
                   <Label > Dados giroscopio(x,y,z)</Label>
                   <Label class="gyroscopex" [text]="[(gyroscope.x)]"></Label>
                   <Label class="gyroscopey" [text]="[(gyroscope.y)]"></Label>
                   <Label class="gyroscopez" [text]="[(gyroscope.z)]"></Label>
+                  <Label class ="nsteps"> Numero de passos = {{steps}}</Label>
                 </StackLayout>
               </ScrollView>

@@ -1,12 +1,15 @@
-import { Component } from '@angular/core'
-import { ActivatedRoute } from '@angular/router'
+import { Component , Injectable, ChangeDetectorRef} from '@angular/core'
 import { Observable, alert } from "@nativescript/core";
+import { BehaviorSubject, observable, of } from 'rxjs'; 
 import { BarcodeScanner } from "nativescript-barcodescanner";
 import { SalaModel } from '~/app/core/models/sala.model'
 import { SalaService} from '~/app/core/services/sala.service'
-import { Sensor } from '~/app/sensors/motionSensors';
+import { ScanModel } from '~/app/core/models/scan.model'
+import { Sensor, CallbackMotion } from '~/app/sensors/motionSensors';
 import { MotionSensor } from '~/app/sensors/motionSensors.android';
 //import { on as applicationOn, launchEvent, suspendEvent, resumeEvent, exitEvent, lowMemoryEvent, uncaughtErrorEvent, ApplicationEventData } from "tns-core-modules/application";
+
+//https://stackoverflow.com/questions/46047854/how-to-update-a-component-without-refreshing-full-page-angular -> Behavior Subject
 
 @Component({
     moduleId: module.id,
@@ -14,15 +17,21 @@ import { MotionSensor } from '~/app/sensors/motionSensors.android';
     templateUrl: 'qrcode.component.html'
   })
 
+
 export class QRComponent extends Observable {
     public message: string
     private barcodeScanner: BarcodeScanner
-
+    private cd: ChangeDetectorRef
     sensors: Sensor[] = [];
     steps = 0;
+    data_counter = 0;
+    scanModel: ScanModel | undefined = undefined
     stepStatus = false;
+    callback_temp: CallbackMotion
+    door_scanned = false
     degree = 0;
     degreeDirection = "";
+    newdata = false;
     gyroscope = { x: 0, y: 0, z: 0 };
     accelerometer = { x: 0, y: 0, z: 0 };
     motionSensor = new MotionSensor();
@@ -35,8 +44,8 @@ export class QRComponent extends Observable {
   
     constructor() {
       super();
+      
       this.barcodeScanner = new BarcodeScanner()
-
       this.motionSensor
       .requestPermission()
       .then(() => {
@@ -50,29 +59,45 @@ export class QRComponent extends Observable {
     }
 
     public initListeners(){
-     /** this.motionSensor.onStep(
+      
+      this.motionSensor.onStep(
         (data) => {
           this.steps = data[0];
-          console.log("STEPS: " + this.steps);  
+          //console.log("STEPS: " + this.steps);  
+        },
+        (status) =>{
+         // console.log("STATUS:" + status)
         }
-      );*/ 
+      )
   
       this.motionSensor.onOrientation((data) => {
+        this.data_counter+=1
+        this.newdata = true
         const degree = data[0];
         this.degreeDirection = this.motionSensor.getDirection(degree);
-        console.log("degree: " + this.degree);
-        console.log("degreeDirection: " + this.degreeDirection);
-        
+       /*  console.log("degree: " + this.degree);
+        console.log("degreeDirection: " + this.degreeDirection);*/
+        if(this.door_scanned){
+          this.scanModel.Directions[this.data_counter] = data[0]
+        }
       });
   
       this.motionSensor.onGyroscope((data) => {
+        this.newdata = true
         this.gyroscope = { x: data[0], y: data[1], z: data[2] };
-        console.log("gyroscope x: " + this.gyroscope.x + "gyroscope y: "+this.gyroscope.y + "gyroscope z: "+this.gyroscope.z);
+        if(this.door_scanned){
+          this.scanModel.Gyroscope[this.data_counter] = data
+        }
+        //console.log("gyroscope x: " + this.gyroscope.x + "gyroscope y: "+this.gyroscope.y + "gyroscope z: "+this.gyroscope.z);
       });
   
       this.motionSensor.onAccelerometer((data) => {
+        this.newdata = true
         this.accelerometer = { x: data[0], y: data[1], z: data[2] };
-        console.log("accelerometer x: " + this.accelerometer.x + "accelerometer y: "+this.accelerometer.y + "accelerometer z: "+this.accelerometer.z);
+        if(this.door_scanned){
+          this.scanModel.Gyroscope[this.data_counter] = data
+        }
+       // console.log("accelerometer x: " + this.accelerometer.x + "accelerometer y: "+this.accelerometer.y + "accelerometer z: "+this.accelerometer.z);
       });
   
       this.hasSensors.stepCounter = this.motionSensor.hasSensorStepCounter;
@@ -82,6 +107,7 @@ export class QRComponent extends Observable {
     }
   
     public onScanResult(scanResult: any) {
+      alert("tagala")
       console.log(`onScanResult: ${scanResult.text} (${scanResult.format})`);
     }
   
@@ -138,10 +164,10 @@ export class QRComponent extends Observable {
           console.log("Scanner fechado @ " + new Date().getTime());
         }
       }).then(
-          function (result) {
+          function (result){
             console.log("--- scanned: " + result.text)
             setTimeout(function () {
-              var result_to_process = result.format.split("room=",(1))
+              //-var result_to_process = result.format.split("room=",(1))
               alert({
                 title: "Resultado do Scan",
                 message: "Formato: " + result.format + ",\nValor: " + result.text,
@@ -150,11 +176,30 @@ export class QRComponent extends Observable {
             }, 500);
           },
           function (errorMessage) {
-            console.log("Não houve scan. " + errorMessage)
-          }
-      );
+            console.log("Não houve scan. " + errorMessage)}
+          
+      )
+    }
+
+    public stopScan(){
+
+    }
+
+    public startButton(){
+      //Função de teste
+      this.door_scanned = true
+      alert(this.door_scanned)
+    }
+
+    public stopButton(){
+      //Função de teste
+      this.door_scanned = false
+    }
+    public setDataCollectionStatus(status){
+      this.door_scanned = status
     }
   }
+
 
   export function doRequestCameraPermission() {
     this.barcodeScanner.requestCameraPermission()
