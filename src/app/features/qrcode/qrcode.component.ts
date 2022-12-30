@@ -1,15 +1,17 @@
-import { Component , Injectable, ChangeDetectorRef} from '@angular/core'
+import { Component , Injectable, ChangeDetectorRef, NgZone} from '@angular/core'
 import { Observable, alert } from "@nativescript/core";
-import { BehaviorSubject, observable, of } from 'rxjs'; 
+import { BehaviorSubject} from 'rxjs'; 
 import { BarcodeScanner } from "nativescript-barcodescanner";
 import { SalaModel } from '~/app/core/models/sala.model'
 import { SalaService} from '~/app/core/services/sala.service'
 import { ScanModel } from '~/app/core/models/scan.model'
 import { Sensor, CallbackMotion } from '~/app/sensors/motionSensors';
+import { OnInit } from '@angular/core';
 import { MotionSensor } from '~/app/sensors/motionSensors.android';
 //import { on as applicationOn, launchEvent, suspendEvent, resumeEvent, exitEvent, lowMemoryEvent, uncaughtErrorEvent, ApplicationEventData } from "tns-core-modules/application";
 
 //https://stackoverflow.com/questions/46047854/how-to-update-a-component-without-refreshing-full-page-angular -> Behavior Subject
+//Usei o NgZone para o programa saber que este têm de manter a parte do programa que está lá inserido em sincronização com o processo da view
 
 @Component({
     moduleId: module.id,
@@ -18,20 +20,25 @@ import { MotionSensor } from '~/app/sensors/motionSensors.android';
   })
 
 
-export class QRComponent extends Observable {
+export class QRComponent extends Observable implements OnInit{
     public message: string
     private barcodeScanner: BarcodeScanner
     private cd: ChangeDetectorRef
     sensors: Sensor[] = [];
     steps = 0;
+    time:string = ""
     data_counter = 0;
     scanModel: ScanModel | undefined = undefined
     stepStatus = false;
     callback_temp: CallbackMotion
     door_scanned = false
-    degree = 0;
-    degreeDirection = "";
+    degreeSubject = new BehaviorSubject<Number>(0)
+    degree:Number = 0
+    degreeDirection = ""
+    degreeDirectionSubject = new BehaviorSubject<string>("Null")
     newdata = false;
+    gyroscopeSubject: BehaviorSubject<any> = new BehaviorSubject<any>({ x: 0, y: 0, z: 0 })
+    accelerometerSubject:BehaviorSubject<any> = new BehaviorSubject<any>({ x: 0, y: 0, z: 0 })
     gyroscope = { x: 0, y: 0, z: 0 };
     accelerometer = { x: 0, y: 0, z: 0 };
     motionSensor = new MotionSensor();
@@ -42,7 +49,7 @@ export class QRComponent extends Observable {
       accelerometer: true,
     };
   
-    constructor() {
+    constructor(private ngZone: NgZone) {
       super();
       
       this.barcodeScanner = new BarcodeScanner()
@@ -59,55 +66,45 @@ export class QRComponent extends Observable {
     }
 
     public initListeners(){
-      
+      this.ngZone.run(() =>{
       this.motionSensor.onStep(
         (data) => {
+          
           this.steps = data[0];
-          //console.log("STEPS: " + this.steps);  
+          this.degreeSubject.next(this.degree)
+          console.log("STEPS: " + this.steps);  
         },
         (status) =>{
          // console.log("STATUS:" + status)
         }
       )
-  
-      this.motionSensor.onOrientation((data) => {
-        this.data_counter+=1
-        this.newdata = true
-        const degree = data[0];
-        this.degreeDirection = this.motionSensor.getDirection(degree);
-       /*  console.log("degree: " + this.degree);
-        console.log("degreeDirection: " + this.degreeDirection);*/
-        if(this.door_scanned){
-          this.scanModel.Directions[this.data_counter] = data[0]
-        }
-      });
-  
-      this.motionSensor.onGyroscope((data) => {
-        this.newdata = true
-        this.gyroscope = { x: data[0], y: data[1], z: data[2] };
-        if(this.door_scanned){
-          this.scanModel.Gyroscope[this.data_counter] = data
-        }
-        //console.log("gyroscope x: " + this.gyroscope.x + "gyroscope y: "+this.gyroscope.y + "gyroscope z: "+this.gyroscope.z);
-      });
-  
+
+        this.motionSensor.onOrientation((data) => {
+          /*this.data_counter+=1*/
+          this.degreeDirectionSubject.next(this.motionSensor.getDirection(data[0]))
+          this.degreeSubject.next(data[0])
+        });
+      
+
+        this.motionSensor.onGyroscope((data) => {
+          this.gyroscopeSubject.next({ x: data[0], y: data[1], z: data[2] })
+        });
+      
+
       this.motionSensor.onAccelerometer((data) => {
-        this.newdata = true
-        this.accelerometer = { x: data[0], y: data[1], z: data[2] };
-        if(this.door_scanned){
-          this.scanModel.Gyroscope[this.data_counter] = data
-        }
-       // console.log("accelerometer x: " + this.accelerometer.x + "accelerometer y: "+this.accelerometer.y + "accelerometer z: "+this.accelerometer.z);
+        this.accelerometerSubject.next({ x: data[0], y: data[1], z: data[2] })
       });
-  
+      
+      // Basicamente como o Behaviour Subject consegue servir de observante e observador conseguimos o usar como um método para subscrever ao método de recolha de dados
+
       this.hasSensors.stepCounter = this.motionSensor.hasSensorStepCounter;
       this.hasSensors.orientation = this.motionSensor.hasSensorOrientation;
       this.hasSensors.gyroscope = this.motionSensor.hasSensorGyroscope;
       this.hasSensors.accelerometer = this.motionSensor.hasSensorAccelerometer;
+    })
     }
   
     public onScanResult(scanResult: any) {
-      alert("tagala")
       console.log(`onScanResult: ${scanResult.text} (${scanResult.format})`);
     }
   
@@ -177,10 +174,10 @@ export class QRComponent extends Observable {
           },
           function (errorMessage) {
             console.log("Não houve scan. " + errorMessage)}
-          
       )
     }
 
+    
     public stopScan(){
 
     }
@@ -188,7 +185,6 @@ export class QRComponent extends Observable {
     public startButton(){
       //Função de teste
       this.door_scanned = true
-      alert(this.door_scanned)
     }
 
     public stopButton(){
@@ -197,8 +193,35 @@ export class QRComponent extends Observable {
     }
     public setDataCollectionStatus(status){
       this.door_scanned = status
+      console.log(this.door_scanned)
     }
-  }
+
+    ngOnInit() {
+      
+      this.gyroscopeSubject.subscribe((gyroscope) => {
+        this.gyroscope = gyroscope
+        console.log("posição telemóvel: " , this.gyroscope)
+      });
+
+      this.accelerometerSubject.subscribe((accelerometer) => {
+        this.accelerometer = accelerometer
+        console.log("aceleração: " , this.accelerometer)
+      });
+
+      this.degreeDirectionSubject.subscribe((degreeDirection) => {
+        this.degreeDirection = degreeDirection
+        console.log("direção: " , this.degreeDirection)
+      });
+
+      this.degreeSubject.subscribe((degree) => {
+        this.degree = degree
+        console.log("degree: " , this.degree)
+      });
+      setInterval(() => {
+        this.time = new Date().toLocaleTimeString();
+      }, 0);
+    } 
+    }
 
 
   export function doRequestCameraPermission() {

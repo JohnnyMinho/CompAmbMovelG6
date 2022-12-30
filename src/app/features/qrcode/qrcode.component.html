@@ -19,11 +19,11 @@
                       <!--<Label text="......................................." style="margin-top: 8; color: #FFF; opacity: 0.5" horizontalAlignment="center" verticalAlignment="center"/>-->
                     </GridLayout>
                   </iOS>
-                  <Button class="-primary" text = "Parar recolha de dados" (tap)="stopButton"></Button>
-                  <Button class="-primary" text = "Iniciar recolha de dados" (tap)="startButton"></Button>
-                  <Label> Recolha de dados ativa -> {{door_scanned}}</Label>
+                  <Button class="-primary" text = "Parar recolha de dados" (tap)="stopButton()"></Button>
+                  <Button class="-primary" text = "Iniciar recolha de dados" (tap)="startButton()"></Button>
                   <Button class="-primary" text="Ler QR" (tap)=" doScanWithBackCamera() "></Button>
-                  <Label [text]="degreeDirection"> </Label>
+                  <label> Direção: {{degreeDirection}} </label>
+                  <label> Grau: {{degree}}</label>
                   <Label > Dados accelerometer(x,y,z)</Label>
                   <Label class="accelerometerx" on="this.motionSensor.onAccelerometer" >{{accelerometer.x}} </Label>
                   <Label class="accelerometery">{{accelerometer.y}} </Label>
@@ -33,5 +33,6 @@
                   <Label class="gyroscopey" [text]="[(gyroscope.y)]"></Label>
                   <Label class="gyroscopez" [text]="[(gyroscope.z)]"></Label>
                   <Label class ="nsteps"> Numero de passos = {{steps}}</Label>
+
                 </StackLayout>
               </ScrollView>
